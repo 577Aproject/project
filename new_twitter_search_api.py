@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import requests_oauthlib
 import csv
+import boto3
 
 # Replace the values below with yours
 CONSUMER_KEY = '2lqt4zKdTSyueMSosEyADkZuq'
@@ -34,8 +35,8 @@ def get_7days_tweets(max_id=0):
     return response
 
 # save data into csv file
-def convert_tweets_to_csv(response):
-    with open('result.csv', 'a+') as file:
+def convert_tweets_to_csv(response, ttID):
+    with open('{}.csv'.format(ttID), 'a+') as file:
         for resp in response.iter_lines():
             statuses = json.loads(resp)['statuses']
             last_id = statuses[len(statuses) - 1]['id']
@@ -50,22 +51,17 @@ def convert_tweets_to_csv(response):
                 line.append(str(status['retweet_count']))
                 df = pd.DataFrame(line).T
                 df.to_csv(file, header=False, index=False)
-
     return last_id
 
 # get query based on parameters
 def get_query(query_list):
-
     string = ''
-
     # only has key words:
     if len(query_list) == 1:
         string = query_list[0]
-
     # have two key words:
     if len(query_list) == 2:
         string = query_list[0] + '%20' + query_list[1]
-
     # have more than two key words
     if len(query_list) > 2:
         string = query_list[0] + '%20%28'
@@ -76,28 +72,25 @@ def get_query(query_list):
                 string = string + query_list[i] + '%29'
     return string
 
-# start scraping function
-def run(num, query_list):
 
+# start scraping function
+def run(num, query_list, ttID):
     # create csv file
-    with open('result.csv', 'w', newline='') as f:
+    with open('{}.csv'.format(ttID), 'w', newline='') as f:
         head = ['id', 'created_at', 'text', 'favorite_count', 'retweet_count']
         writer = csv.writer(f)
         writer.writerow(head)
-
     # get search query
     query_data.append(('q', str(get_query(query_list))))
-
     # get response
     response = get_7days_tweets()
     # statuses = json.loads(response)['statuses']
     # print(statuses)
     count = 0
-
     # get the other part of data
     while True:
         count += 1
         if count == num + 1:
             break
-        last_id = convert_tweets_to_csv(response)
+        last_id = convert_tweets_to_csv(response, ttID)
         response = get_7days_tweets(last_id)
