@@ -9,7 +9,11 @@ CONSUMER_SECRET = 'tQHyN0oR46GCGGn7uOTKTFdA5ivB8ixFUNYp4JB8o88rflNh6w'
 ACCESS_TOKEN = '1183084435421351937-wh2G26PTPmvfY5oM37w2CamNkVvcb1'
 ACCESS_SECRET = '33ljJ3n3Mm5MxRUYcQfEgN8Zi6WPErVvCZB7PctO0i24d'
 my_auth = requests_oauthlib.OAuth1(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_SECRET)
-
+query_data = [('q', str(get_query(query_list))),
+            ('count', '100'),
+            ('result_type', 'recent'),
+            ('lang', 'en')
+            ]
 
 
 # get request response
@@ -50,28 +54,27 @@ def convert_tweets_to_csv(http_resp):
     return last_id
 
 # get query based on parameters
-def get_query():
+def get_query(query_list):
     string = ''
     # only has key words:
-    if len(list) == 1:
-        string = list[0]
+    if len(query_list) == 1:
+        string = query_list[0]
     # have two key words:
-    if len(list) == 2:
-        string = list[0] + '%20' + list[1]
+    if len(query_list) == 2:
+        string = query_list[0] + '%20' + query_list[1]
     # have more than two key words
-    if len(list) > 2:
-        string = list[0] + '%20%28'
-        for i in range(1, len(list)):
-            if i is not len(list) - 1:
-                string = string + list[i] + '%20OR%20'
+    if len(query_list) > 2:
+        string = query_list[0] + '%20%28'
+        for i in range(1, len(query_list)):
+            if i is not len(query_list) - 1:
+                string = string + query_list[i] + '%20OR%20'
             else:
-                string = string + list[i] + '%29'
+                string = string + query_list[i] + '%29'
 
-    print(string)
     return string
 
 # start scraping function
-def run(num):
+def run(num, query_list):
     resp = get_7days_tweets()
     count = 1
     while True:
@@ -82,14 +85,14 @@ def run(num):
         resp = get_7days_tweets(last_id)
     print(count)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    list = ['nba', 'kobe', 'curry']
-    num = 10;
-    query_data = [('q', str(get_query())),
-                  ('count', '100'),
-                  ('result_type', 'recent'),
-                  ('lang', 'en')
-                  ]
-    print("Starting getting tweets.")
-    run(num)
+#     query_list = ['nba', 'kobe', 'curry']
+#     num = 10
+#     query_data = [('q', str(get_query())),
+#                   ('count', '100'),
+#                   ('result_type', 'recent'),
+#                   ('lang', 'en')
+#                   ]
+#     print("Starting getting tweets.")
+#     run(num)
