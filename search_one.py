@@ -12,10 +12,9 @@ cnx = mysql.connector.connect(
 
 cursor = cnx.cursor()
 
-def runOne(ttID, search_round = 3):
+def runOne(ttID, movie_name, search_round = 3):
     query = "SELECT title FROM demo_title_detail WHERE region = 'US' and titleId = '{}'".format(ttID)
     cursor.execute(query)
-    movie_name = [movie for movie in cursor][0][0]
     query = ("SELECT nconst FROM demo_title_principal WHERE tconst = '{}'".format(ttID))
     cursor.execute(query)
     actor_ids = [x[0] for x in cursor]
