@@ -1,10 +1,10 @@
+import sys
+import mysql.connector
 import json
 import pandas as pd
 import requests
 import requests_oauthlib
 import csv
-import mysql.connector
-import sys
 import boto3
 
 # Replace the values below with yours
@@ -50,7 +50,6 @@ def get_7days_tweets(max_id=0):
 def convert_tweets_to_csv(response, ttID):
     with open('{}.csv'.format(ttID), 'a+') as file:
         for resp in response.iter_lines():
-            # print(resp)
             statuses = json.loads(resp)['statuses']
             last_id = statuses[len(statuses) - 1]['id']
             for status in statuses:
@@ -64,17 +63,22 @@ def convert_tweets_to_csv(response, ttID):
                 line.append(str(status['retweet_count']))
                 df = pd.DataFrame(line).T
                 df.to_csv(file, header=False, index=False)
+
     return last_id
 
 # get query based on parameters
 def get_query(query_list):
+
     string = ''
+
     # only has key words:
     if len(query_list) == 1:
         string = query_list[0]
+
     # have two key words:
     if len(query_list) == 2:
         string = query_list[0] + '%20' + query_list[1]
+
     # have more than two key words
     if len(query_list) > 2:
         string = query_list[0] + '%20%28'
@@ -85,6 +89,32 @@ def get_query(query_list):
                 string = string + query_list[i] + '%29'
     return string
 
+# start scraping function
+def run(num, query_list, ttID):
+
+    # create csv file
+    with open('{}.csv'.format(ttID), 'w', newline='') as f:
+        head = ['id', 'created_at', 'text', 'favorite_count', 'retweet_count']
+        writer = csv.writer(f)
+        writer.writerow(head)
+
+    # get search query
+    query_data.append(('q', str(get_query(query_list))))
+
+    # get response
+    response = get_7days_tweets()
+    # statuses = json.loads(response)['statuses']
+    # print(statuses)
+    count = 0
+
+    # get the other part of data
+    while True:
+        count += 1
+        if count == num + 1:
+            break
+        last_id = convert_tweets_to_csv(response, ttID)
+        response = get_7days_tweets(last_id)
+
 
 def upload_file(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -94,9 +124,11 @@ def upload_file(file_name, bucket, object_name=None):
     :param object_name: S3 object name. If not specified then file_name is used
     :return: True if file was uploaded, else False
     """
+
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = file_name
+
     # Upload the file
     s3_client = boto3.client('s3')
     try:
@@ -105,29 +137,6 @@ def upload_file(file_name, bucket, object_name=None):
         logging.error(e)
         return False
     return True
-
-# start scraping function
-def run(num, query_list, ttID):
-    # create csv file
-    with open('{}.csv'.format(ttID), 'w', newline='') as f:
-        head = ['id', 'created_at', 'text', 'favorite_count', 'retweet_count']
-        writer = csv.writer(f)
-        writer.writerow(head)
-    # get search query
-    query_data.append(('q', str(get_query(query_list))))
-    # get response
-    response = get_7days_tweets()
-    # statuses = json.loads(response)['statuses']
-    # print(statuses)
-    count = 0
-    # get the other part of data
-    while True:
-        count += 1
-        if count == num + 1:
-            break
-        last_id = convert_tweets_to_csv(response, ttID)
-        response = get_7days_tweets(last_id)
-    upload_file('{}.csv'.format(ttID), 'demoteam10')
 
 
 def runOne(ttID, search_round = 3):
@@ -142,11 +151,12 @@ def runOne(ttID, search_round = 3):
         query = "SELECT primaryName FROM demo_name WHERE nconst = '{}'".format(actor_id)
         cursor.execute(query)
         actor_names.extend(next(cursor)[0].split())
+    movie_name = movie_name.replace(' ', '%20')
     query_list = [movie_name] + actor_names
-    print(search_round)
-    print(query_list)
-    print(ttID)
     run(search_round, query_list, ttID)
+    upload_file('{}.csv'.format(ttID), 'demoteam10')
+
+
 
 if __name__ == "__main__":
-    run(3, ['Avengers: Endgame'], 'tt4154796')
+    runOne(sys.argv[1])

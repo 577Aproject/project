@@ -1,5 +1,6 @@
 import mysql.connector
 from new_twitter_search_api import run
+import sys
 
 cnx = mysql.connector.connect(
     host="127.0.0.1",
@@ -14,7 +15,7 @@ cursor = cnx.cursor()
 def runOne(ttID, search_round = 3):
     query = "SELECT title FROM demo_title_detail WHERE region = 'US' and titleId = '{}'".format(ttID)
     cursor.execute(query)
-    movie_name = [movie for movie in cursor][0]
+    movie_name = [movie for movie in cursor][0][0]
     query = ("SELECT nconst FROM demo_title_principal WHERE tconst = '{}'".format(ttID))
     cursor.execute(query)
     actor_ids = [x[0] for x in cursor]
@@ -27,4 +28,4 @@ def runOne(ttID, search_round = 3):
     run(search_round, query_list, ttID)
 
 if __name__ == "__main__":
-    runOne()
+    runOne(sys.argv[1])
