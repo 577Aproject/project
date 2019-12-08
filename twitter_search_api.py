@@ -8,11 +8,14 @@ from pytz import timezone
 import pytz
 import datetime
 
+with open("developer_config.json") as file:
+    config = json.load(file)
+
 # Replace the values below with yours
-CONSUMER_KEY = '2lqt4zKdTSyueMSosEyADkZuq'
-CONSUMER_SECRET = 'tQHyN0oR46GCGGn7uOTKTFdA5ivB8ixFUNYp4JB8o88rflNh6w'
-ACCESS_TOKEN = '1183084435421351937-wh2G26PTPmvfY5oM37w2CamNkVvcb1'
-ACCESS_SECRET = '33ljJ3n3Mm5MxRUYcQfEgN8Zi6WPErVvCZB7PctO0i24d'
+CONSUMER_KEY = config["CONSUMER_KEY"]
+CONSUMER_SECRET = config["CONSUMER_SECRET"]
+ACCESS_TOKEN = config["ACCESS_TOKEN"]
+ACCESS_SECRET = config["ACCESS_SECRET"]
 my_auth = requests_oauthlib.OAuth1(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_SECRET)
 
 # default query data

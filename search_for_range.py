@@ -2,18 +2,21 @@ from search_one_movie import run_for_one_movie
 import mysql.connector
 import sys
 import time
+import json
 
 def range_search(start, end):
+    with open('db_config.json') as file:
+        config = json.load(file)
     cnx = mysql.connector.connect(
-    host="127.0.0.1",
-    port=3306,
-    user="demo",
-    password="demo",
-    database="project_chatter"
+        host = config['host'],
+        port = config['port'],
+        user = config['user'],
+        password = config['password'],
+        database = config['database']
     )
 
     cursor = cnx.cursor()
-    query = "select tconst, primaryTitle from demo_title_basics_2019 limit {}, {}".format(str(start), str(end - start + 1))
+    query = "select tconst, primaryTitle from {} limit {}, {}".format(config["title_basics"], str(start), str(end - start + 1))
     cursor.execute(query)
 
     ttID_movie_list = [data for data in cursor]

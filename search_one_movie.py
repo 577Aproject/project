@@ -6,14 +6,20 @@ import os
 from pytz import timezone
 import pytz
 import datetime
+import json
+
+
+with open('db_config.json', 'r') as file:
+    config = json.load(file)
+
 
 cnx = mysql.connector.connect(
-    host="127.0.0.1",
-    port=3306,
-    user="demo",
-    password="demo",
-    database="project_chatter"
-    )
+    host = config['host'],
+    port = config['port'],
+    user = config['user'],
+    password = config['password'],
+    database = config['database']
+)
 
 cursor = cnx.cursor()
 
@@ -42,12 +48,12 @@ def upload_file(file_name, bucket, object_name=None):
     return True
 
 def run_for_one_movie(ttID, movie_name):
-    query = ("SELECT nconst FROM demo_title_principal WHERE tconst = '{}'".format(ttID))
+    query = ("SELECT nconst FROM {} WHERE tconst = '{}'".format(config["title_principal"], ttID))
     cursor.execute(query)
     actor_ids = [x[0] for x in cursor]
     actor_names = []
     for actor_id in actor_ids:
-        query = "SELECT primaryName FROM demo_name WHERE nconst = '{}'".format(actor_id)
+        query = "SELECT primaryName FROM {} WHERE nconst = '{}'".format(config["principal_name"], actor_id)
         cursor.execute(query)
         actor_names.extend(next(cursor)[0].split())
     query_list = [movie_name] + actor_names

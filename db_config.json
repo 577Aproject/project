@@ -1,0 +1,10 @@
+{
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "demo",
+    "password": "demo",
+    "database": "project_chatter",
+    "title_basics": "demo_title_basics_2019",
+    "title_principal": "demo_title_principal",
+    "principal_name": "demo_name"
+}
