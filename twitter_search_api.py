@@ -4,6 +4,9 @@ import requests
 import requests_oauthlib
 import csv
 import os
+from pytz import timezone
+import pytz
+import datetime
 
 # Replace the values below with yours
 CONSUMER_KEY = '2lqt4zKdTSyueMSosEyADkZuq'
@@ -34,10 +37,10 @@ def get_tweets(query_data):
 # save data into csv file
 def convert_tweets_to_csv(response, filename, ttID):
     # raise exception if we reach the limitation, and delete the empty file
-    if 'errors' in response.text:
-        print(response.text)
-        os.remove('{}.csv'.format(ttID))
-        raise Exception('too many requests')
+    # if 'errors' in response.text:
+    #     print(response.text)
+    #     os.remove('{}.csv'.format(ttID))
+    #     raise Exception('too many requests')
 
     with open(filename, 'a+') as file:
         for resp in response.iter_lines():
@@ -106,12 +109,23 @@ def get_query_key_words(query_list, flag):
 def run(query_list, ttID):
     # empty the set for a new movie
     seen.clear()
+    
+    today = datetime.datetime.now(tz=pytz.utc)
+    today = today.astimezone(timezone('US/Pacific'))
+    yesterday = today - datetime.timedelta(1)
 
     # default query data
+    # query_data = [
+    #         ('count', '100'),
+    #         ('result_type', 'recent'),
+    #         ('lang', 'en')
+    #         ]
     query_data = [
             ('count', '100'),
             ('result_type', 'recent'),
-            ('lang', 'en')
+            ('lang', 'en'),
+            ('until', '{}-{}-{}'.format(today.year, today.month, today.day)),
+            ('since', '{}-{}-{}'.format(yesterday.year, yesterday.month, yesterday.day))
             ]
 
     # create csv file

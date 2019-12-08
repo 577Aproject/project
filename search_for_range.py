@@ -29,5 +29,5 @@ def range_search(start, end):
 
 if __name__ == "__main__":
     for start in range(0, 2000, 75):
-        range_search(start, start + 74)
         time.sleep(950)
+        range_search(start, start + 74)
